@@ -76,23 +76,31 @@ class Agent:
         """
         self.__tWords = self.__words
 
-    def load(self, filename):
+    def learn(self, word):
+        """
+        ## Learn
+        Adds a new word to agent knowledge. RESETS AGENT TEMPORARY WORD BUFFER WHEN CALLED. Must be used only at the end of episode.
+        """
+        self.__words.add(word)
+        self.reset()
+
+    def load(self, filename, sep='\n'):
         """
         ## Import
         Import knowledge for agent. RESETS CURRENT KNOWLEGDE.
         """
         with open(filename, encoding='utf-8') as f:
-            self.__words = set(f.read().split('\n'))
+            self.__words = set(f.read().split(sep))
 
         print(f"Loaded {len(self.__words)} words succesfully.")
 
-    def export(self, filename):
+    def export(self, filename, sep='\n'):
         """
         ## Export
         Export agent knowlegde to a .csv or .txt file. File type MUST BE SPECIFIED in filename.
         """
         with open(filename, 'w', encoding='utf-8') as f:
-            f.write('\n'.join(self.__words))
+            f.write(sep.join(self.__words))
 
         print(f"File saved in  {filename}.")
 
@@ -126,9 +134,14 @@ class Agent:
 
             if len(self.__words) > 0: #Using agent total knowledge to estimate letter relationships. This might be expesive!
                 self.__letterRelationships()
+                currentWord = state.getWord()
+                for i, letter in enumerate(currentWord):
+                    if letter == '_': #Algorithm should guess for first unknown letter found left to right
+                        if i == 0: # If the first letter is missing
+                            return max(self.__firstLetterFrequency, key=self.__firstLetterFrequency.get)
+                        
+                        elif currentWord[i-1] != '_': # If any other letter is missing
+                            return max(self.__firstLetterFrequency, key=self.__firstLetterFrequency.get)
 
-                for letter in state.getWord():
-                    pass
-
-            else: #If agent has no knowledge at all, just guesses a random letter
-                return set(ABC).difference(state.getLetters())[randint(0, 25 - len(state.getLetters()))]
+            #Returns random letter case no other heuristic is available
+            return set(ABC).difference(state.getLetters())[randint(0, 25 - len(state.getLetters()))]

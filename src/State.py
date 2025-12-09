@@ -1,8 +1,18 @@
 class State:
-    def __init__(self):
-        self.__realWord = list()
+    def __init__(self, word):
+        self.__realWord = list(word)
         self.__lettersUsed = set()
         self.__currentWord = ['_'] * len(self.__realWord)
+
+    def setWord(self, word):
+        """Set a new word to the environment"""
+        self.__realWord = list(word)
+        self.__lettersUsed = set()
+        self.__currentWord = ['_'] * len(self.__realWord)
+
+    def addLetterUsed(self, letter):
+        assert type(letter) == str and len(letter) == 1, "Letter must be a string with length == 1."
+        self.__lettersUsed.add(letter)
 
     def getLetters(self):
         """Get letters already used by the agent"""
