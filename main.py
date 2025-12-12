@@ -4,7 +4,7 @@ from src.State import State
 
 if __name__ == "__main__":
     agent = Agent()
-    env = Environment("", 5)
+    env = Environment(5)
 
     agent.load("src/data/agent.txt") # Loading sabe data for both agent and environment
     env.load("src/data/words.txt")

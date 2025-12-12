@@ -2,7 +2,7 @@ from src.State import State
 from random import randint, sample
 
 class Environment:
-    def __init__(self, word, tries):
+    def __init__(self, tries, word=""):
         """
         ## Hangman Environment
         This implementation of hangman game allows the user to load a set of words so an intelligent agent plays and learns gradually to make better guesses.
