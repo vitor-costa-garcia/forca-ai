@@ -31,3 +31,5 @@ cd venv\Scripts\
 activate
 pip install unidecode
 ```
+
+Made by André Tomonada Schettini & Vitor da Costa Garcia
