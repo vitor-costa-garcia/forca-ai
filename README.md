@@ -32,4 +32,4 @@ activate
 pip install unidecode
 ```
 
-Made by André Tomonada Schettini & Vitor da Costa Garcia
+Made by André Tomonaga Schettini & Vitor da Costa Garcia
