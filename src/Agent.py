@@ -6,20 +6,6 @@ ABC = 'abcdefghijklmnopqrstuvwxyz'
 
 class Agent:
     def __init__(self):
-        """
-        ## Agent
-        Simple agent for the hangman game.
-
-        ## Methods
-        ### Load:
-        Load external knowledge for agent. Must recieve path to .csv file with words.
-        ### Export:
-        Export internal knowledge from agent. Must receive name for exported file.
-        ### Guess:
-        Guesses a letter or word based on current state. If no words matches the current state, a simple heuristic is used to determine
-        a good guess. Returns a string.
-        """
-
         self.__words = set()
         self.__tWords = set()
         self.__letterRelations = dict()
@@ -114,17 +100,14 @@ class Agent:
         ## Guess
         Guesses a letter or word based on current state.
         """
-        # Filtering possible words
+        # Filtra as palavras possíveis
         self.__filter(state)
 
-        if '_' not in state.getWord():
+        if '_' not in state.getWord(): # Retorna a palavra caso tenha encontrado
             return "".join(state.getWord())
-        # if len(self.__tWords) == 1 and '_' not in state.getWord():
-        #     # Word found!
-        #     return list(self.__tWords)[0]
 
-        elif len(self.__tWords) > 0:
-            # Chooses most frequent letter count by word
+        elif len(self.__tWords) > 0: # Se o agente ainda tem palavras que batem com o padrão do ambiente
+            # Conta a frequência de cada letra no conjunto de palavras conhecidas
             frequencyByLetter = {l : 0 for l in ABC}
             for word in self.__tWords:
                 wordWP = unidecode(word)
@@ -137,29 +120,36 @@ class Agent:
             for letter in state.getLetters():
                 frequencyByLetter[letter] = -1
 
-            # Returns letter with max frequency
+            # Retorna a letra com maior frequência
             letterChosen = max(frequencyByLetter, key=frequencyByLetter.get)
             return letterChosen
 
-        else: # The word is unknown, heuristic is needed. Full agent knowlegde should be used here to estimate best letter.
+        else: # Caso o agente não conheça a palavra, usa o modelo n-gramas como heurística para adivinhar letras.
 
-            if len(self.__words) > 0: #Using agent total knowledge to estimate letter relationships. This might be expesive!
+            if len(self.__words) > 0: # Usa o conhecimento total do agente para encontrar relações bigrama.
                 if not self.__letterRelationsUpdated:
                     self.__letterRelationsUpdated = True
                     self.__letterRelationships()
 
-                currentWord = state.getWord()
-                for i, letter in enumerate(currentWord):
-                    if letter == '_': #Algorithm should guess for first unknown letter found left to right
-                        if i == 0: # If the first letter is missing
-                            letterRelationsSorted = sorted(self.__firstLetterFrequency, key=self.__firstLetterFrequency.get, reverse=True)
+                currentWord = "".join(state.getWord())
+                currentWordWA = unidecode(currentWord)
+                for i, letter in enumerate(currentWordWA):
+                    try:
+                        if letter == '_': #Algoritmo tenta adivinhar a primeira letra primeiro
+                            if i == 0:
+                                letterRelationsSorted = sorted(self.__firstLetterFrequency, key=self.__firstLetterFrequency.get, reverse=True)
+                            
+                            elif currentWord[i-1] != '_': # Se não for a primeira letra faltando, utiliza bigramas
+                                letterRelationsSorted = sorted(self.__letterRelations[currentWordWA[i-1]], key=self.__letterRelations[currentWordWA[i-1]].get, reverse=True)
+                            
+                            else:
+                                continue
                         
-                        elif currentWord[i-1] != '_': # If any other letter is missing
-                            letterRelationsSorted = sorted(self.__letterRelations[currentWord[i-1]], key=self.__letterRelations[currentWord[i-1]].get, reverse=True)
-                    
-                        for letterFromRelations in letterRelationsSorted:
-                            if letterFromRelations not in state.getLetters():
-                                return letterFromRelations
+                            for letterFromRelations in letterRelationsSorted:
+                                if letterFromRelations not in state.getLetters():
+                                    return letterFromRelations
+                    except Exception as e:
+                        continue
 
-            #Returns random letter case no other heuristic is available
+            #Caso nenhum dos algoritmos acima seja possível, retorna uma letra aleatória
             return list(set(ABC).difference(state.getLetters()))[randint(0, 25 - len(state.getLetters()))]
